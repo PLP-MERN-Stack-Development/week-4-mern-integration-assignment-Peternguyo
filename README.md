@@ -1,5 +1,9 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=19893429&assignment_repo_type=AssignmentRepo)
+[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=19885093&assignment_repo_type=AssignmentRepo)
 # MERN Stack Integration Assignment
+
+final project
+
+![alt text](<Screenshot 2025-07-02 231140.png>) ![alt text](<Screenshot 2025-07-02 231203.png>) ![alt text](<Screenshot 2025-07-02 231237.png>) ![alt text](<Screenshot 2025-07-02 231114.png>)
 
 This assignment focuses on building a full-stack MERN (MongoDB, Express.js, React.js, Node.js) application that demonstrates seamless integration between front-end and back-end components.
 

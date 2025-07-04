@@ -1,78 +1,66 @@
-// server.js - Main server file for the MERN blog application
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-// Import required modules
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const path = require('path');
+// Routes
+import postRoutes from './routes/postRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
-// Import routes
-const postRoutes = require('./routes/posts');
-const categoryRoutes = require('./routes/categories');
-const authRoutes = require('./routes/auth');
+// Middleware & Models
+import errorHandler from './middleware/errorHandler.js';
+import Category from './models/Category.js';
 
-// Load environment variables
 dotenv.config();
-
-// Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // ✅ Frontend URL
+  credentials: true               // ✅ Allow cookies
+}));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Log requests in development mode
-if (process.env.NODE_ENV === 'development') {
-  app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
-    next();
-  });
+// 📁 Static upload folder setup
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsPath = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath);
+  console.log('📁 uploads/ folder created');
 }
+app.use('/uploads', express.static(uploadsPath));
 
-// API routes
+// ✅ API Routes
 app.use('/api/posts', postRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/auth', authRoutes);
 
-// Root route
-app.get('/', (req, res) => {
-  res.send('MERN Blog API is running');
-});
+// ❌ Error Handler
+app.use(errorHandler);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    success: false,
-    error: err.message || 'Server Error',
-  });
-});
+// 🌱 Seed default categories
+const seedDefaultCategories = async () => {
+  const existing = await Category.find();
+  if (existing.length === 0) {
+    const defaults = ['Technology', 'Health', 'Education', 'Lifestyle', 'Travel'];
+    await Category.insertMany(defaults.map(name => ({ name })));
+    console.log('🌱 Default categories seeded');
+  }
+};
 
-// Connect to MongoDB and start server
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+// 🚀 Start server
+mongoose.connect(process.env.MONGO_URI)
+  .then(async () => {
+    console.log('✅ MongoDB connected');
+    await seedDefaultCategories();
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => {
-    console.error('Failed to connect to MongoDB', err);
-    process.exit(1);
+    console.error('❌ MongoDB connection error:', err);
   });
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Promise Rejection:', err);
-  // Close server & exit process
-  process.exit(1);
-});
-
-module.exports = app; 
